@@ -1,101 +1,82 @@
 const express = require("express");
-const Booking = require("../models/Payment");
+const Payment = require("../models/Payment");
 
 const router = express.Router();
 
-// GET all bookings
+// GET all payments
 router.get("/", async (req, res) => {
   try {
-    const bookings = await Booking.find();
+    const payments = await Payment.find();
 
-    res.json(bookings);
+    res.json(payments);
   } catch (error) {
     res.status(500).json({
-      message: "Failed to fetch bookings",
+      message: "Failed to fetch payments",
       error: error.message,
     });
   }
 });
 
-// GET booking by ID
+// GET payment by ID
 router.get("/:id", async (req, res) => {
   try {
-    const booking = await Booking.findById(req.params.id);
+    const payment = await Payment.findById(req.params.id);
 
-    if (!booking) {
+    if (!payment) {
       return res.status(404).json({
-        message: "Booking not found",
+        message: "Payment not found",
       });
     }
 
-    res.json(booking);
+    res.json(payment);
   } catch (error) {
     res.status(500).json({
-      message: "Failed to fetch booking",
+      message: "Failed to fetch payment",
       error: error.message,
     });
   }
 });
 
-// CREATE booking
+// CREATE / PROCESS PAYMENT
 router.post("/", async (req, res) => {
   try {
-    const booking = await Booking.create(req.body);
+    const { bookingId, amount, simulateFailure = false } = req.body;
 
-    res.status(201).json(booking);
-  } catch (error) {
-    res.status(400).json({
-      message: "Failed to create booking",
-      error: error.message,
-    });
-  }
-});
-
-// UPDATE booking
-router.put("/:id", async (req, res) => {
-  try {
-    const booking = await Booking.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
-
-    if (!booking) {
-      return res.status(404).json({
-        message: "Booking not found",
+    if (!bookingId || amount === undefined) {
+      return res.status(400).json({
+        message: "bookingId and amount are required",
       });
     }
 
-    res.json(booking);
-  } catch (error) {
-    res.status(400).json({
-      message: "Failed to update booking",
-      error: error.message,
-    });
-  }
-});
+    if (simulateFailure) {
+      const failedPayment = await Payment.create({
+        bookingId,
+        amount,
+        status: "FAILED",
+      });
 
-// CANCEL booking
-router.delete("/:id", async (req, res) => {
-  try {
-    const booking = await Booking.findByIdAndUpdate(
-      req.params.id,
-      { status: "CANCELLED" },
-      { new: true },
-    );
-
-    if (!booking) {
-      return res.status(404).json({
-        message: "Booking not found",
+      return res.status(402).json({
+        message: "Payment failed",
+        payment: failedPayment,
       });
     }
 
-    res.json({
-      message: "Booking cancelled successfully",
-      booking,
+    const transactionId = `TXN-${Date.now()}`;
+
+    const payment = await Payment.create({
+      bookingId,
+      amount,
+      status: "SUCCESS",
+      transactionId,
+    });
+
+    res.status(201).json({
+      message: "Payment successful",
+      payment,
     });
   } catch (error) {
     res.status(500).json({
-      message: "Failed to cancel booking",
+      message: "Payment processing failed",
       error: error.message,
     });
   }
