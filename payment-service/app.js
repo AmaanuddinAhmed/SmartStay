@@ -3,6 +3,7 @@ const cors = require("cors");
 require("dotenv").config();
 
 const connectDB = require("./config/db");
+
 const paymentRoutes = require("./routes/paymentRoutes");
 
 const app = express();
@@ -10,6 +11,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Health check
 app.get("/health", (req, res) => {
   res.json({
     service: "Payment Service",
@@ -17,6 +19,7 @@ app.get("/health", (req, res) => {
   });
 });
 
+// API routes
 app.use("/api/v1/payments", paymentRoutes);
 
 const PORT = process.env.PORT || 5003;
