@@ -6,6 +6,7 @@ const connectDB = require("./config/db");
 
 const hotelRoutes = require("./routes/hotelRoutes");
 const roomRoutes = require("./routes/roomRoutes");
+const registerService = require("./utils/registerService");
 
 const app = express();
 
@@ -31,6 +32,7 @@ const startServer = async () => {
 
   app.listen(PORT, () => {
     console.log(`Hotel Service running on port ${PORT}`);
+    registerService("hotel-service", PORT);
   });
 };
 

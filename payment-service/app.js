@@ -5,6 +5,7 @@ require("dotenv").config();
 const connectDB = require("./config/db");
 
 const paymentRoutes = require("./routes/paymentRoutes");
+const registerService = require("./utils/registerService");
 
 const app = express();
 
@@ -29,6 +30,7 @@ const startServer = async () => {
 
   app.listen(PORT, () => {
     console.log(`Payment Service running on port ${PORT}`);
+    registerService("payment-service", PORT);
   });
 };
 

@@ -4,6 +4,7 @@ require("dotenv").config();
 
 const connectDB = require("./config/db");
 const recommendationRoutes = require("./routes/recommendationRoutes");
+const registerService = require("./utils/registerService");
 
 const app = express();
 
@@ -26,6 +27,7 @@ const startServer = async () => {
 
   app.listen(PORT, () => {
     console.log(`Recommendation Service running on port ${PORT}`);
+    registerService("recommendation-service", PORT);
   });
 };
 
