@@ -37,7 +37,7 @@ const forwardTo = (serviceName) => async (req, res) => {
     });
   }
 
-  console.log(`[Gateway] ${req.method} ${req.originalUrl} → ${serviceName}`);
+  console.log(`[Gateway] ${req.method} ${req.originalUrl} -> ${serviceName}`);
 
   // 2. Forward request, pass the service's response through unchanged
   try {

@@ -1,8 +1,16 @@
 const express = require("express");
 const Booking = require("../../models/Booking");
-const runBookingSaga = require("../../saga/bookingSaga");
+const runBookingSaga = require("../../saga/bookingSaga"); 
+const mongoose = require("mongoose");
 
-const router = express.Router();
+const router = express.Router(); 
+
+router.param("id", (req, res, next, id) => {
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ message: "Invalid id format" });
+  }
+  next();
+});
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 

@@ -16,6 +16,7 @@ const STEP_LABELS = {
   CONFIRM_BOOKING: "Booking confirmation",
   "COMPENSATE: RELEASE_ROOM": "Room release (rollback)",
   "COMPENSATE: CANCEL_BOOKING": "Booking cancellation (rollback)",
+  "COMPENSATE: REFUND_PAYMENT": "Payment refund (rollback)",
 };
 
 const STATUS_TEXT = {

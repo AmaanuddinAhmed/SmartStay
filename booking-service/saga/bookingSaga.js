@@ -40,13 +40,30 @@ const cancelBooking = async (booking, log) => {
   }
 };
 
+const refundPayment = async (payment, log) => {
+  try {
+    await callService(
+      "payment-service",
+      "put",
+      `/api/v1/payments/${payment._id}/refund`,
+    );
+    log("COMPENSATE: REFUND_PAYMENT", "SUCCESS");
+  } catch (error) {
+    log(
+      "COMPENSATE: REFUND_PAYMENT",
+      "FAILED",
+      `${reason(error)}. Needs manual refund`,
+    );
+  }
+};
+
 // ---------- Saga ----------
 
 const runBookingSaga = async (input) => {
   const steps = [];
   const log = (step, status, detail = "") => {
     steps.push({ step, status, ...(detail && { detail }) });
-    console.log(`[Saga] ${step}: ${status}${detail ? " — " + detail : ""}`);
+    console.log(`[Saga] ${step}: ${status}${detail ? " - " + detail : ""}`);
   };
 
   // Fallback: if Payment circuit is OPEN, don't start the saga at all
@@ -121,18 +138,24 @@ const runBookingSaga = async (input) => {
   }
 
   // Step 4: Confirm booking
-  booking.status = "CONFIRMED";
-  await booking.save();
-  log("CONFIRM_BOOKING", "SUCCESS");
-
-  return {
-    ok: true,
-    status: 201,
-    message: "Booking confirmed",
-    booking,
-    payment,
-    steps,
-  };
+  try {
+    booking.status = "CONFIRMED";
+    await booking.save();
+    log("CONFIRM_BOOKING", "SUCCESS");
+  } catch (error) {
+    log("CONFIRM_BOOKING", "FAILED", error.message);
+    await refundPayment(payment, log);
+    await releaseRoom(booking, log);
+    await cancelBooking(booking, log);
+    return {
+      ok: false,
+      status: 500,
+      message:
+        "Booking could not be confirmed. Payment refunded and room released.",
+      booking,
+      steps,
+    };
+  }
 };
 
 module.exports = runBookingSaga;

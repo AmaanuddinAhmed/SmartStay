@@ -2,7 +2,7 @@
   "name": "service-registry",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
     "start": "node app.js",
     "dev": "node --watch app.js"
@@ -13,7 +13,6 @@
   "type": "commonjs",
   "dependencies": {
     "cors": "^2.8.6",
-    "dotenv": "^17.4.2",
     "express": "^5.2.1"
   }
 }

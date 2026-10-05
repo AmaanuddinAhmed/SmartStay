@@ -37,8 +37,10 @@ function Layout() {
   const [results, setResults] = useState(null);
 
   return (
-        <div className="shell">
-      <a className="skip-link" href="#main">Skip to content</a>
+    <div className="shell">
+      <a className="skip-link" href="#main">
+        Skip to content
+      </a>
       <header className="topbar">
         <Link to="/" className="brand">
           SmartStay
@@ -46,7 +48,7 @@ function Layout() {
         <span className="tagline">Hotels ranked by why you're travelling</span>
       </header>
 
-            <main id="main">
+      <main id="main">
         <Outlet context={{ search, setSearch, results, setResults }} />
       </main>
 
@@ -66,7 +68,7 @@ export default function App() {
         <Route path="/hotels/:id" element={<HotelPage />} />
         <Route path="/book" element={<BookingPage />} />
         <Route path="/confirmation" element={<ConfirmationPage />} />
-                <Route path="*" element={<NotFound />} />
+        <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>
   );

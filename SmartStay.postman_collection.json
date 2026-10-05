@@ -1,0 +1,1346 @@
+{
+  "info": {
+    "name": "SmartStay",
+    "description": "All requests go through the API Gateway on port 5000, except the registry folder. Run folders 1 to 7 in order with all services up and a freshly seeded hotel database. Folders 8 and 9 contain manual failure demos.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Registry and health",
+      "item": [
+        {
+          "name": "Registry health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{registryUrl}}/health",
+              "host": ["{{registryUrl}}"],
+              "path": ["health"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List registered services",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{registryUrl}}/api/v1/registry/services",
+              "host": ["{{registryUrl}}"],
+              "path": ["api", "v1", "registry", "services"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Four services registered\", () => pm.expect(pm.response.json().length).to.eql(4));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Discover hotel-service",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{registryUrl}}/api/v1/registry/services/hotel-service",
+              "host": ["{{registryUrl}}"],
+              "path": ["api", "v1", "registry", "services", "hotel-service"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Discover unknown service",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{registryUrl}}/api/v1/registry/services/unknown-service",
+              "host": ["{{registryUrl}}"],
+              "path": ["api", "v1", "registry", "services", "unknown-service"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 404\", () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Gateway health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2. Hotels",
+      "item": [
+        {
+          "name": "List hotels",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/hotels",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "hotels"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set(\"hotelId\", pm.response.json()[0]._id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get hotel by id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/hotels/{{hotelId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "hotels", "{{hotelId}}"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create hotel",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/hotels",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "hotels"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Postman Test Hotel\",\n  \"location\": \"Hebbal, Bangalore\",\n  \"description\": \"Created from Postman\",\n  \"rating\": 4.0,\n  \"amenities\": [\n    \"wifi\",\n    \"parking\"\n  ],\n  \"priceRange\": 3000,\n  \"suitableFor\": [\n    \"business\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set(\"newHotelId\", pm.response.json()._id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update hotel",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/hotels/{{newHotelId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "hotels", "{{newHotelId}}"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rating\": 4.4\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create hotel without required fields",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/hotels",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "hotels"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Incomplete\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get hotel with invalid id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/hotels/abc",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "hotels", "abc"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3. Rooms",
+      "item": [
+        {
+          "name": "List rooms of a hotel",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/rooms?hotelId={{hotelId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "rooms"],
+              "query": [
+                {
+                  "key": "hotelId",
+                  "value": "{{hotelId}}"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "const free = pm.response.json().filter((r) => r.available && r.capacity >= 2);",
+                  "pm.test(\"Two free rooms for the saga tests (run npm run seed if this fails)\", () => pm.expect(free.length).to.be.at.least(2));",
+                  "pm.collectionVariables.set(\"roomId\", free[0]._id);",
+                  "pm.collectionVariables.set(\"roomId2\", free[1]._id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get room by id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/rooms/{{roomId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "rooms", "{{roomId}}"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create room",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/rooms",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "rooms"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"hotelId\": \"{{newHotelId}}\",\n  \"roomType\": \"Test Room\",\n  \"pricePerNight\": 3000,\n  \"capacity\": 2\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set(\"newRoomId\", pm.response.json()._id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reserve room",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/rooms/{{newRoomId}}/reserve",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "rooms", "{{newRoomId}}", "reserve"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reserve same room again",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/rooms/{{newRoomId}}/reserve",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "rooms", "{{newRoomId}}", "reserve"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 409\", () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Release room",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/rooms/{{newRoomId}}/release",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "rooms", "{{newRoomId}}", "release"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete hotel and its rooms",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/hotels/{{newHotelId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "hotels", "{{newHotelId}}"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Deleted hotel's room is gone",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/rooms/{{newRoomId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "rooms", "{{newRoomId}}"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 404\", () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "4. Recommendations",
+      "item": [
+        {
+          "name": "Get recommendations",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/recommendations",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "recommendations"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"destination\": \"Bangalore\",\n  \"budget\": 5000,\n  \"purpose\": \"business\",\n  \"preferences\": [\n    \"wifi\",\n    \"workspace\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Sorted by match score\", () => { const r = pm.response.json().results; pm.expect(r[0].matchScore).to.be.at.least(r[r.length - 1].matchScore); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Recommendations without purpose",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/recommendations",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "recommendations"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"budget\": 5000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Recommendation logs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/recommendations",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "recommendations"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "5. Bookings v1",
+      "item": [
+        {
+          "name": "Create booking (PENDING)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/bookings",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "bookings"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"USER001\",\n  \"hotelId\": \"{{hotelId}}\",\n  \"roomId\": \"{{roomId}}\",\n  \"checkIn\": \"2026-11-10\",\n  \"checkOut\": \"2026-11-12\",\n  \"guests\": 2\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"Status is PENDING\", () => pm.expect(pm.response.json().status).to.eql(\"PENDING\"));",
+                  "pm.collectionVariables.set(\"v1BookingId\", pm.response.json()._id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List bookings",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/bookings",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "bookings"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get booking by id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/bookings/{{v1BookingId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "bookings", "{{v1BookingId}}"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update booking dates",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/bookings/{{v1BookingId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "bookings", "{{v1BookingId}}"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"checkOut\": \"2026-11-13\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Amount recalculated for 3 nights\", () => pm.expect(pm.response.json().totalAmount).to.be.above(0));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cancel booking",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/bookings/{{v1BookingId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "bookings", "{{v1BookingId}}"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cancel again",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/bookings/{{v1BookingId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "bookings", "{{v1BookingId}}"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 409\", () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create booking with missing fields",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/bookings",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "bookings"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"USER001\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "6. Bookings v2 (Saga)",
+      "item": [
+        {
+          "name": "Saga success",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v2/bookings",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v2", "bookings"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"USER001\",\n  \"hotelId\": \"{{hotelId}}\",\n  \"roomId\": \"{{roomId}}\",\n  \"checkIn\": \"2026-11-10\",\n  \"checkOut\": \"2026-11-12\",\n  \"guests\": 2\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+                  "const b = pm.response.json();",
+                  "pm.test(\"Booking CONFIRMED\", () => pm.expect(b.data.status).to.eql(\"CONFIRMED\"));",
+                  "pm.collectionVariables.set(\"bookingId\", b.data.id);",
+                  "pm.collectionVariables.set(\"paymentId\", b.payment._id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Saga on an already reserved room",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v2/bookings",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v2", "bookings"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"USER001\",\n  \"hotelId\": \"{{hotelId}}\",\n  \"roomId\": \"{{roomId}}\",\n  \"checkIn\": \"2026-11-10\",\n  \"checkOut\": \"2026-11-12\",\n  \"guests\": 2\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 409\", () => pm.response.to.have.status(409));",
+                  "pm.test(\"Booking CANCELLED\", () => pm.expect(pm.response.json().data.status).to.eql(\"CANCELLED\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Saga with payment failure (compensation)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v2/bookings",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v2", "bookings"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"USER001\",\n  \"hotelId\": \"{{hotelId}}\",\n  \"roomId\": \"{{roomId2}}\",\n  \"checkIn\": \"2026-11-10\",\n  \"checkOut\": \"2026-11-12\",\n  \"guests\": 2,\n  \"simulateFailure\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 402\", () => pm.response.to.have.status(402));",
+                  "const steps = pm.response.json().saga.map((s) => s.step);",
+                  "pm.test(\"Room released\", () => pm.expect(steps).to.include(\"COMPENSATE: RELEASE_ROOM\"));",
+                  "pm.test(\"Booking cancelled\", () => pm.expect(steps).to.include(\"COMPENSATE: CANCEL_BOOKING\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Room is available again after rollback",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/rooms/{{roomId2}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "rooms", "{{roomId2}}"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"available is true\", () => pm.expect(pm.response.json().available).to.eql(true));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List bookings (v2 format)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v2/bookings",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v2", "bookings"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"apiVersion is v2\", () => pm.expect(pm.response.json().apiVersion).to.eql(\"v2\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get booking by id (v2 format)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v2/bookings/{{bookingId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v2", "bookings", "{{bookingId}}"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Same booking in v1 format",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/bookings/{{bookingId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "bookings", "{{bookingId}}"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "7. Payments",
+      "item": [
+        {
+          "name": "List payments",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/payments",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "payments"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get payment by id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/payments/{{paymentId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "payments", "{{paymentId}}"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Refund payment",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/payments/{{paymentId}}/refund",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "payments", "{{paymentId}}", "refund"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Refund again",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/payments/{{paymentId}}/refund",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "payments", "{{paymentId}}", "refund"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 409\", () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cancel confirmed booking (releases room)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/bookings/{{bookingId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "bookings", "{{bookingId}}"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Room released after cancel",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/rooms/{{roomId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "rooms", "{{roomId}}"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"available is true\", () => pm.expect(pm.response.json().available).to.eql(true));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "8. Circuit Breaker (manual: stop payment-service first)",
+      "item": [
+        {
+          "name": "Circuit status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/circuit-status",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "circuit-status"]
+            },
+            "description": "Run before and after the failures to watch CLOSED, OPEN and HALF_OPEN."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Booking while Payment Service is down (send 3 times)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v2/bookings",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v2", "bookings"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"USER001\",\n  \"hotelId\": \"{{hotelId}}\",\n  \"roomId\": \"{{roomId2}}\",\n  \"checkIn\": \"2026-11-10\",\n  \"checkOut\": \"2026-11-12\",\n  \"guests\": 2\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Stop payment-service, then send this three times. The first three return 503 after a rollback; the fourth is rejected immediately because the circuit is OPEN. Restart payment-service, wait 15 seconds and send again to see HALF_OPEN then CLOSED."
+          }
+        }
+      ]
+    },
+    {
+      "name": "9. Gateway fault handling",
+      "item": [
+        {
+          "name": "Unknown route",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/unknown",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "unknown"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 404\", () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Hotels while Hotel Service is stopped (manual)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/hotels",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "hotels"]
+            },
+            "description": "Stop hotel-service and send. Expect 503 from the Gateway; the other services keep working."
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000"
+    },
+    {
+      "key": "registryUrl",
+      "value": "http://localhost:5005"
+    },
+    {
+      "key": "hotelId",
+      "value": ""
+    },
+    {
+      "key": "roomId",
+      "value": ""
+    },
+    {
+      "key": "roomId2",
+      "value": ""
+    },
+    {
+      "key": "newHotelId",
+      "value": ""
+    },
+    {
+      "key": "newRoomId",
+      "value": ""
+    },
+    {
+      "key": "v1BookingId",
+      "value": ""
+    },
+    {
+      "key": "bookingId",
+      "value": ""
+    },
+    {
+      "key": "paymentId",
+      "value": ""
+    }
+  ]
+}
