@@ -11,7 +11,6 @@ const httpError = (status, message) => {
 };
 
 // Validates a booking request against Hotel Service and computes totalAmount.
-// Reused by v1 create and (later) the v2 Saga.
 const prepareBooking = async ({
   userId,
   hotelId,

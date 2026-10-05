@@ -1,7 +1,16 @@
 const express = require("express");
 const Hotel = require("../models/Hotel");
+const mongoose = require("mongoose");
+const Room = require("../models/Room");
 
 const router = express.Router();
+
+router.param("id", (req, res, next, id) => {
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ message: "Invalid id format" });
+  }
+  next();
+});
 
 // GET all hotels
 router.get("/", async (req, res) => {
@@ -85,8 +94,10 @@ router.delete("/:id", async (req, res) => {
       });
     }
 
+    await Room.deleteMany({ hotelId: hotel._id });
+
     res.json({
-      message: "Hotel deleted successfully",
+      message: "Hotel and its rooms deleted successfully",
     });
   } catch (error) {
     res.status(500).json({

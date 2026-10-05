@@ -4,6 +4,13 @@ const mongoose = require("mongoose");
 
 const router = express.Router();
 
+router.param("id", (req, res, next, id) => {
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ message: "Invalid id format" });
+  }
+  next();
+});
+
 // GET all rooms (optional ?hotelId= filter)
 router.get("/", async (req, res) => {
   try {

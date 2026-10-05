@@ -45,7 +45,7 @@ app.post("/api/v1/registry/register", (req, res) => {
     lastHeartbeat: Date.now(),
   };
 
-  if (isNew) console.log(`Registered: ${name} → ${url}`);
+  if (isNew) console.log(`Registered: ${name} -> ${url}`);
 
   res.json({
     message: isNew ? "Service registered" : "Heartbeat received",

@@ -3,8 +3,16 @@ const axios = require("axios");
 const Recommendation = require("../models/Recommendation");
 const scoreHotel = require("../utils/scoreHotel");
 const discover = require("../utils/discover");
+const mongoose = require("mongoose");
 
 const router = express.Router();
+
+router.param("id", (req, res, next, id) => {
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ message: "Invalid id format" });
+  }
+  next();
+});
 
 // GET recommendation logs
 router.get("/", async (req, res) => {

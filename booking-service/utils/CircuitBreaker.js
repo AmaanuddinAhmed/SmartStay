@@ -19,7 +19,7 @@ class CircuitBreaker {
 
   transition(newState) {
     if (this.state !== newState) {
-      console.log(`[CircuitBreaker:${this.name}] ${this.state} → ${newState}`);
+      console.log(`[CircuitBreaker:${this.name}] ${this.state} -> ${newState}`);
       this.state = newState;
     }
   }

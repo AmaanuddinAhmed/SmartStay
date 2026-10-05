@@ -18,11 +18,9 @@ const registerService = (name, port) => {
         console.log(`[${name}] Registered with Service Registry`);
       registered = true;
     } catch (error) {
-      if (registered || registered === false) {
-        console.warn(
-          `[${name}] Registry unreachable, retrying in ${HEARTBEAT_MS / 1000}s`,
-        );
-      }
+      console.warn(
+        `[${name}] Registry unreachable, retrying in ${HEARTBEAT_MS / 1000}s`,
+      );
       registered = false;
     }
   };

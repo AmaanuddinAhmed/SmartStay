@@ -1,7 +1,15 @@
 const express = require("express");
 const Payment = require("../models/Payment");
+const mongoose = require("mongoose");
 
 const router = express.Router();
+
+router.param("id", (req, res, next, id) => {
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ message: "Invalid id format" });
+  }
+  next();
+});
 
 // GET all payments
 router.get("/", async (req, res) => {
@@ -77,6 +85,32 @@ router.post("/", async (req, res) => {
   } catch (error) {
     res.status(500).json({
       message: "Payment processing failed",
+      error: error.message,
+    });
+  }
+});
+
+router.put("/:id/refund", async (req, res) => {
+  try {
+    const payment = await Payment.findOneAndUpdate(
+      { _id: req.params.id, status: "SUCCESS" },
+      { status: "REFUNDED" },
+      { new: true },
+    );
+
+    if (!payment) {
+      const exists = await Payment.exists({ _id: req.params.id });
+      return exists
+        ? res
+            .status(409)
+            .json({ message: "Only successful payments can be refunded" })
+        : res.status(404).json({ message: "Payment not found" });
+    }
+
+    res.json({ message: "Payment refunded", payment });
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to refund payment",
       error: error.message,
     });
   }
