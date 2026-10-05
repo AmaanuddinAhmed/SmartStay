@@ -25,7 +25,7 @@ const releaseRoom = async (booking, log) => {
     log(
       "COMPENSATE: RELEASE_ROOM",
       "FAILED",
-      `${reason(error)} — needs manual release`,
+      `${reason(error)}. Needs manual release`,
     );
   }
 };

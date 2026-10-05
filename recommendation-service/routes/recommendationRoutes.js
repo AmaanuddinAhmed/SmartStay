@@ -1,7 +1,7 @@
 const express = require("express");
 const axios = require("axios");
 const Recommendation = require("../models/Recommendation");
-const scoreHotel = require("../utils/scoreHotel"); 
+const scoreHotel = require("../utils/scoreHotel");
 const discover = require("../utils/discover");
 
 const router = express.Router();
@@ -27,13 +27,12 @@ router.post("/", async (req, res) => {
   }
 
   // Fetch hotels from Hotel Service (HTTP, not its DB)
-    let hotels;
+  let hotels;
   try {
     const hotelServiceUrl = await discover("hotel-service");
-    const response = await axios.get(
-      `${hotelServiceUrl}/api/v1/hotels`,
-      { timeout: 3000 },
-    );
+    const response = await axios.get(`${hotelServiceUrl}/api/v1/hotels`, {
+      timeout: 3000,
+    });
     hotels = response.data;
   } catch (error) {
     return res.status(503).json({
@@ -61,6 +60,7 @@ router.post("/", async (req, res) => {
         location: hotel.location,
         pricePerNight: hotel.priceRange,
         rating: hotel.rating,
+        imageUrl: hotel.imageUrl,
         matchScore: score,
         reasons,
       };

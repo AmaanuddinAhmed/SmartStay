@@ -1,13 +1,22 @@
 const express = require("express");
 const Room = require("../models/Room");
+const mongoose = require("mongoose");
 
 const router = express.Router();
 
-// GET all rooms
+// GET all rooms (optional ?hotelId= filter)
 router.get("/", async (req, res) => {
   try {
-    const rooms = await Room.find();
+    const filter = {};
 
+    if (req.query.hotelId) {
+      if (!mongoose.Types.ObjectId.isValid(req.query.hotelId)) {
+        return res.status(400).json({ message: "Invalid hotelId" });
+      }
+      filter.hotelId = req.query.hotelId;
+    }
+
+    const rooms = await Room.find(filter);
     res.json(rooms);
   } catch (error) {
     res.status(500).json({
