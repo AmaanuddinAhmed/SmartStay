@@ -1,5 +1,6 @@
 const express = require("express");
 const Booking = require("../models/Booking");
+const prepareBooking = require("../utils/prepareBooking");
 
 const router = express.Router();
 
@@ -37,14 +38,15 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// CREATE booking
+// CREATE booking (validated via Hotel Service)
 router.post("/", async (req, res) => {
   try {
-    const booking = await Booking.create(req.body);
+    const bookingData = await prepareBooking(req.body);
+    const booking = await Booking.create(bookingData);
 
     res.status(201).json(booking);
   } catch (error) {
-    res.status(400).json({
+    res.status(error.status || 400).json({
       message: "Failed to create booking",
       error: error.message,
     });
