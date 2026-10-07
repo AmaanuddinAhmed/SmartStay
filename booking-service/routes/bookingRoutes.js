@@ -51,7 +51,7 @@ router.get("/:id", async (req, res) => {
 // CREATE booking (validated via Hotel Service)
 router.post("/", async (req, res) => {
   try {
-    const bookingData = await prepareBooking(req.body);
+    const bookingData = await prepareBooking(req.body || {});
     const booking = await Booking.create(bookingData);
 
     res.status(201).json(booking);
@@ -82,7 +82,7 @@ router.put("/:id", async (req, res) => {
       checkIn = booking.checkIn,
       checkOut = booking.checkOut,
       guests = booking.guests,
-    } = req.body;
+    } = req.body || {};
 
     const updated = await prepareBooking({
       userId: booking.userId,

@@ -1,11 +1,12 @@
 const axios = require("axios");
 
 const HEARTBEAT_MS = 30000;
+const RETRY_MS = 3000;
 
 const registerService = (name, port) => {
   const registryUrl = process.env.REGISTRY_URL || "http://localhost:5005";
   const url = `http://localhost:${port}`;
-  let registered = false;
+  let registered = null;
 
   const register = async () => {
     try {
@@ -18,15 +19,17 @@ const registerService = (name, port) => {
         console.log(`[${name}] Registered with Service Registry`);
       registered = true;
     } catch (error) {
-      console.warn(
-        `[${name}] Registry unreachable, retrying in ${HEARTBEAT_MS / 1000}s`,
-      );
+      if (registered !== false)
+        console.warn(
+          `[${name}] Registry unreachable, retrying every ${RETRY_MS / 1000}s`,
+        );
       registered = false;
     }
+
+    setTimeout(register, registered ? HEARTBEAT_MS : RETRY_MS);
   };
 
   register();
-  setInterval(register, HEARTBEAT_MS);
 };
 
 module.exports = registerService;

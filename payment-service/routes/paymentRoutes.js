@@ -48,7 +48,7 @@ router.get("/:id", async (req, res) => {
 // CREATE / PROCESS PAYMENT
 router.post("/", async (req, res) => {
   try {
-    const { bookingId, amount, simulateFailure = false } = req.body;
+    const { bookingId, amount, simulateFailure = false } = req.body || {};
 
     if (!bookingId || amount === undefined) {
       return res.status(400).json({
@@ -95,7 +95,7 @@ router.put("/:id/refund", async (req, res) => {
     const payment = await Payment.findOneAndUpdate(
       { _id: req.params.id, status: "SUCCESS" },
       { status: "REFUNDED" },
-      { new: true },
+      { returnDocument: "after" },
     );
 
     if (!payment) {

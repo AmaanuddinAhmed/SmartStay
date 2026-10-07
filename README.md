@@ -6,7 +6,7 @@ MCSA Unit 2 Microservices Mini Project, Team 3 (Hotel Booking System).
 
 ## Architecture
 
-![SmartStay architecture](docs/architecture.png)
+![SmartStay architecture](architecture.svg)
 
 The frontend talks only to the API Gateway. The Gateway and every service find each other through the Service Registry. Each business service owns its own MongoDB database and no service reads another service's database.
 
@@ -179,7 +179,7 @@ To demonstrate: stop `payment-service`, send three v2 bookings, check `/api/v1/c
 
 ## Testing
 
-Import `docs/SmartStay.postman_collection.json` into Postman. With all services running and a freshly seeded database, run folders 1 to 7 in order; each request has status checks and passes IDs to the next. Folders 8 and 9 are manual failure demos.
+Import `SmartStay.postman_collection.json` into Postman. With all services running and a freshly seeded database, run folders 1 to 7 in order; each request has status checks and passes IDs to the next. Folders 8 and 9 are manual failure demos.
 
 ## Project structure
 
@@ -192,7 +192,8 @@ SmartStay/
 ├── payment-service/         models, routes
 ├── recommendation-service/  models, routes, utils/scoreHotel.js
 ├── frontend/                React app (src/pages)
-└── docs/                    architecture diagram, Postman collection
+├── architecture.svg         architecture diagram
+└── SmartStay.postman_collection.json
 ```
 
 ## Known limitations
