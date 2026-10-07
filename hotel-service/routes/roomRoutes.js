@@ -73,7 +73,7 @@ router.put("/:id/reserve", async (req, res) => {
     const room = await Room.findOneAndUpdate(
       { _id: req.params.id, available: true },
       { available: false },
-      { new: true },
+      { returnDocument: "after" },
     );
 
     if (!room) {
@@ -98,7 +98,7 @@ router.put("/:id/release", async (req, res) => {
     const room = await Room.findByIdAndUpdate(
       req.params.id,
       { available: true },
-      { new: true },
+      { returnDocument: "after" },
     );
 
     if (!room) {

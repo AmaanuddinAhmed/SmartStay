@@ -71,7 +71,7 @@ router.get("/:id", async (req, res) => {
 // CREATE booking via Saga
 router.post("/", async (req, res) => {
   try {
-    const result = await runBookingSaga(req.body);
+    const result = await runBookingSaga(req.body || {});
 
     res.status(result.status).json({
       apiVersion: "v2",

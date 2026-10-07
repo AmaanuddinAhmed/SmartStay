@@ -28,10 +28,22 @@ router.get("/", async (req, res) => {
 
 // POST get recommendations
 router.post("/", async (req, res) => {
-  const { destination, budget, purpose, preferences = [] } = req.body;
+  const { destination, budget, purpose, preferences = [] } = req.body || {};
 
   if (budget === undefined || !purpose) {
     return res.status(400).json({ message: "budget and purpose are required" });
+  }
+
+  if (
+    typeof purpose !== "string" ||
+    isNaN(Number(budget)) ||
+    !Array.isArray(preferences) ||
+    (destination !== undefined && typeof destination !== "string")
+  ) {
+    return res.status(400).json({
+      message:
+        "budget must be a number, purpose and destination text, preferences a list",
+    });
   }
 
   // Fetch hotels from Hotel Service (HTTP, not its DB)

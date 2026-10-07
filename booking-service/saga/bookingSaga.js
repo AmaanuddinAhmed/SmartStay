@@ -156,6 +156,15 @@ const runBookingSaga = async (input) => {
       steps,
     };
   }
+
+  return {
+    ok: true,
+    status: 201,
+    message: "Booking confirmed",
+    booking,
+    payment,
+    steps,
+  };
 };
 
 module.exports = runBookingSaga;

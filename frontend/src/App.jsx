@@ -53,7 +53,7 @@ function Layout() {
       </main>
 
       <footer className="footer">
-        Built by Team 3 as a microservices mini project.
+        Built by Team 3 as a MCSA mini project.
       </footer>
     </div>
   );
